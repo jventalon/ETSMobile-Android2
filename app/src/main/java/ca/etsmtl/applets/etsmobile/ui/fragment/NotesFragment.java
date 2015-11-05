@@ -27,6 +27,7 @@ import ca.etsmtl.applets.etsmobile.ui.adapter.NoteAdapter;
 import ca.etsmtl.applets.etsmobile.ui.adapter.NotesSessionItem;
 import ca.etsmtl.applets.etsmobile.ui.adapter.SessionCoteAdapter;
 import ca.etsmtl.applets.etsmobile.ui.adapter.SessionCoteItem;
+import ca.etsmtl.applets.etsmobile.util.AnalyticsHelper;
 import ca.etsmtl.applets.etsmobile.util.NoteManager;
 import ca.etsmtl.applets.etsmobile.views.LoadingView;
 import ca.etsmtl.applets.etsmobile2.R;
@@ -53,6 +54,9 @@ public class NotesFragment extends HttpFragment implements Observer {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        AnalyticsHelper.sendScreenView(this.getClass().getSimpleName());
+        AnalyticsHelper.sendEvent();
     }
 
     @Override

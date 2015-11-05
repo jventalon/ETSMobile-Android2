@@ -4,12 +4,15 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
 
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -35,6 +38,7 @@ import ca.etsmtl.applets.etsmobile.ui.fragment.RadioFragment;
 import ca.etsmtl.applets.etsmobile.ui.fragment.SecuriteFragment;
 import ca.etsmtl.applets.etsmobile.ui.fragment.SponsorsFragment;
 import ca.etsmtl.applets.etsmobile.ui.fragment.TodayFragment;
+import ca.etsmtl.applets.etsmobile.util.AnalyticsHelper;
 import ca.etsmtl.applets.etsmobile.util.Constants;
 import ca.etsmtl.applets.etsmobile.util.NoteManager;
 import ca.etsmtl.applets.etsmobile.util.ProfilManager;
@@ -48,6 +52,7 @@ import io.supportkit.core.SupportKit;
  */
 public class ApplicationManager extends Application {
 
+    private Tracker tracker;
 
     public static LinkedHashMap<String, MyMenuItem> mMenu = new LinkedHashMap<String, MyMenuItem>(17);
     public static UserCredentials userCredentials;
@@ -55,11 +60,16 @@ public class ApplicationManager extends Application {
     public static int typeUsagerId;
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 
         createDatabaseTables();
-
+        AnalyticsHelper.initialiserTracker(this, "R.xml.global_tracker");
         SupportKit.init(this, getString(R.string.credentials_supportkit));
         Fabric.with(this, new Crashlytics());
 
@@ -232,7 +242,7 @@ public class ApplicationManager extends Application {
         int typeUsagerId = securePreferences.getInt(Constants.TYPE_USAGER_ID, -1);
         String domaine = securePreferences.getString(Constants.DOMAINE, "");
 
-        if(typeUsagerId != -1 && !TextUtils.isEmpty(domaine)) {
+        if (typeUsagerId != -1 && !TextUtils.isEmpty(domaine)) {
             ApplicationManager.typeUsagerId = typeUsagerId;
             ApplicationManager.domaine = domaine;
         }
@@ -281,5 +291,13 @@ public class ApplicationManager extends Application {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    synchronized public Tracker getDefaultTracker() {
+        if (tracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            tracker = analytics.newTracker(R.xml.global_tracker);
+        }
+        return tracker;
     }
 }
